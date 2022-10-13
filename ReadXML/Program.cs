@@ -21,6 +21,236 @@ public class RecursiveFileSearch
         Console.ReadKey();
     }
 
+    public static void CallToChildThread()
+    {
+        //___enable with // or disable by removing //
+
+        Vendormaster();
+
+        ReadBSIK();
+
+        ReadBSAK();
+
+        ReadXML();
+    }
+
+    static void Vendormaster()
+    {
+        string queryString;
+        using StreamWriter file = new("C:\\Users\\he678hu\\OneDrive - EY\\PiSA\\Log.txt", append: true);
+        string[] lines = System.IO.File.ReadAllLines(@"C:\\Users\\he678hu\\OneDrive - EY\\PiSA\\LFA1_PiSA.txt", System.Text.Encoding.ASCII);
+        System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+        stopwatch.Start();
+        // Display the file contents by using a foreach loop.
+
+        foreach (string line in lines)
+        {
+            if (!line.Contains("MANDT"))
+            {
+                queryString = "insert into VENDOR_MASTER(Id,MANDT,LIFNR,LAND1,NAME1,NAME2,NAME3,NAME4,ORT01,ORT02,PFACH," +
+                    "PSTLZ,REGIO,STRAS,ADRNR,ANRED,BEGRU,BRSCH,ERDAT,ERNAM,LOEVM,SPERR,SPERM,STCD1,TELF1,TELF2," +
+                    "VBUND,STCEG,SPERZ) " + "values ('" + line.Replace("'", "").Replace("|", "','") + "')";
+
+                try
+                {
+                    CreateCommand(queryString);
+                }
+                catch (Exception ex)
+                {
+                    file.WriteLine(line);
+                }
+
+            }
+        }
+        stopwatch.Stop();
+        Console.WriteLine("*** Time elapsed: {0}", stopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.fff"));
+    }
+
+    static void ReadXML()
+    {
+
+        System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+        // Path of the XML file, set according to its location on the computer.
+        string[] drives = { "C:\\Users\\he678hu\\OneDrive - EY\\PiSA\\Cab Logistic\\ARCHIVOS XML\\RECIBIDOS\\2018" };
+
+        //Path of the TXT file, set according to its location on the computer.
+        //string[] drives = {"C:\\Users\\he678hu\\OneDrive - EY\\PiSA\\BSAK"};
+
+        foreach (string dr in drives)
+        {
+            System.IO.DriveInfo di = new System.IO.DriveInfo(dr);
+            stopwatch.Start();
+            // Here we skip the drive if it is not ready to be read. This
+            // is not necessarily the appropriate action in all scenarios.
+            if (!di.IsReady)
+            {
+                Console.WriteLine("*** The drive {0} could not be read", di.Name);
+                continue;
+            }
+            System.IO.DirectoryInfo rootDir = new DirectoryInfo(dr);
+            WalkDirectoryTree(rootDir);
+            //BSAK(rootDir);
+            stopwatch.Stop();
+            Console.WriteLine("### Time elapsed: {0}", stopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.fff"));
+        }
+
+        // Write out all the files that could not be processed.
+        Console.WriteLine("Files with restricted access:");
+        foreach (string s in log)
+        {
+            Console.WriteLine(s);
+        }
+    }
+
+    static void ReadBSAK()
+    {
+        System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+
+        //Path of the TXT file, set according to its location on the computer.
+        string[] drives = { "C:\\Users\\he678hu\\OneDrive - EY\\PiSA\\BSAK" };
+
+        foreach (string dr in drives)
+        {
+            System.IO.DriveInfo di = new System.IO.DriveInfo(dr);
+            stopwatch.Start();
+            // Here we skip the drive if it is not ready to be read. This
+            // is not necessarily the appropriate action in all scenarios.
+            if (!di.IsReady)
+            {
+                Console.WriteLine("*** The drive {0} could not be read", di.Name);
+                continue;
+            }
+            System.IO.DirectoryInfo rootDir = new DirectoryInfo(dr);
+            BSAK(rootDir);
+            stopwatch.Stop();
+            Console.WriteLine("### Time elapsed: {0}", stopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.fff"));
+        }
+
+        // Write out all the files that could not be processed.
+        Console.WriteLine("Files with restricted access:");
+        foreach (string s in log)
+        {
+            Console.WriteLine(s);
+        }
+    }
+
+    static void ReadBSIK()
+    {
+        string queryString;
+        string[] lines = System.IO.File.ReadAllLines(@"C:\\Users\\he678hu\\OneDrive - EY\\PiSA\\BSIK\\BSIK_FEB_2022.txt");
+        System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+        stopwatch.Start();
+        // Display the file contents by using a foreach loop.
+
+        foreach (string line in lines)
+        {
+            if (!line.Contains("MANDT") && !line.Contains("Tabla:") && !line.Contains("Campos visualiz.:") && !line.Contains("----------------------------"))
+            {
+                queryString = "insert into BSIK(MANDT,BUKRS,LIFNR,UMSKS,UMSKZ,AUGDT,AUGBL,ZUONR,GJAHR,BELNR,BUZEI," +
+                    "BUDAT,BLDAT,CPUDT,WAERS,XBLNR,BLART,MONAT,BSCHL,ZUMSK,SHKZG,GSBER,MWSKZ,DMBTR,WRBTR,MWSTS,WMWST,BDIFF,BDIF2," +
+                    "SGTXT,PROJN,AUFNR,ANLN1,ANLN2,EBELN,EBELP,SAKNR,HKONT,FKONT,FILKD,ZFBDT,ZTERM,ZBD1T,ZBD2T,ZBD3T,ZBD1P,ZBD2P," +
+                    "SKFBT,SKNTO,WSKTO,ZLSCH,ZLSPR,ZBFIX,HBKID,BVTYP,REBZG,REBZJ,REBZZ,SAMNR,ZOLLT,ZOLLD,LZBKZ,LANDL,DIEKZ,MANSP," +
+                    "MSCHL,MADAT,MANST,MABER,XNETB,XANET,XCPDD,XESRD,XZAHL,MWSK1,DMBT1,WRBT1,MWSK2,DMBT2,WRBT2,MWSK3,DMBT3,WRBT3," +
+                    "QSSKZ,QSSHB,QBSHB,BSTAT,ANFBN,ANFBJ,ANFBU,VBUND,REBZT,STCEG,EGBLD,EGLLD,QSZNR,QSFBT) " + "values ('" + line.Remove(line.Length - 1).Replace("| |", "").Replace("|", "','") + "')";
+
+                CreateCommand(queryString);
+
+            }
+        }
+        stopwatch.Stop();
+        Console.WriteLine("*** Time elapsed: {0}", stopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.fff"));
+    }
+
+    static void BSAK(System.IO.DirectoryInfo root)
+    {
+        string queryString;
+        int[] caracters = { };
+        System.IO.FileInfo[] files = null;
+        System.IO.DirectoryInfo[] subDirs = null;
+        using StreamWriter file = new("C:\\Users\\he678hu\\OneDrive - EY\\PiSA\\Log.txt", append: true);
+
+        // First, process all the files directly under this folder
+        try
+        {
+            files = root.GetFiles("*.*");
+        }
+        // This is thrown if even one of the files requires permissions greater
+        // than the application provides.
+        catch (UnauthorizedAccessException e)
+        {
+            // This code just writes out the message and continues to recurse.
+            // You may decide to do something different here. For example, you
+            // can try to elevate your privileges and access the file again.
+            log.Add(e.Message);
+        }
+
+        catch (System.IO.DirectoryNotFoundException e)
+        {
+            Console.WriteLine(e.Message);
+        }
+
+        if (files != null)
+        {
+            foreach (System.IO.FileInfo fi in files)
+            {
+                Console.WriteLine(fi.FullName);
+                int cnt = 0;
+                string[] lines = System.IO.File.ReadAllLines(fi.FullName, System.Text.Encoding.ASCII);
+
+                System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+                stopwatch.Start();
+                // Display the file contents by using a foreach loop.
+
+                foreach (string line in lines)
+                {
+                    string Cleanline = "";
+                    if (!line.Contains("MANDT") && !line.Contains("Tabla:") && !line.Contains("Campos visualiz.:") && !line.Contains("----------------------------"))
+                    {
+                        Cleanline = line.Remove(0, 3).Remove(line.Length - 4);
+
+                        if (caracters.Length > 0)
+                        {
+                            Cleanline = CleanLine(caracters, line.Remove(0, 3).Remove(line.Length - 4));
+                        }
+
+                        queryString = "insert into BSAK(MANDT,BUKRS,LIFNR,UMSKS,UMSKZ,AUGDT,AUGBL,ZUONR,GJAHR,BELNR,BUZEI,BUDAT,BLDAT,CPUDT," +
+                            "WAERS,XBLNR,BLART,MONAT,BSCHL,ZUMSK,SHKZG,MWSKZ,DMBTR,WRBTR,MWSTS,WMWST,BDIFF,SGTXT,SAKNR,ZFBDT,ZTERM,ZBD1T," +
+                            "ZBD2T,ZBD3T,ZBD1P,ZBD2P,SKFBT,SKNTO,WSKTO,ZLSCH,ZLSPR,ZBFIX,REBZG,REBZJ) " + "values ('" + Cleanline.Replace(",", "").Replace("'", "").Replace("|", "','") + "')";
+
+                        //try
+                        //{
+                        CreateCommand(queryString);
+                        //}
+                        //catch(Exception ex)
+                        /*{
+                            file.WriteLine(Cleanline.Replace("'", "").Replace("'", ""));
+                            cnt = cnt + 1;
+                        }*/
+
+                    }
+                    else
+                    {
+                        if (line.Contains("MANDT"))
+                        {
+                            caracters = CountCaracters(line.Remove(line.Length - 1).Replace("| |", ""));
+                        }
+                    }
+                }
+                stopwatch.Stop();
+                Console.WriteLine(cnt);
+                Console.WriteLine("*** Time elapsed: {0}", stopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.fff"));
+            }
+            // Now find all the subdirectories under this directory.
+            subDirs = root.GetDirectories();
+
+            foreach (System.IO.DirectoryInfo dirInfo in subDirs)
+            {
+                // Resursive call for each subdirectory.
+                BSAK(dirInfo);
+            }
+        }
+    }
+
     static void WalkDirectoryTree(System.IO.DirectoryInfo root)
     {
         System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
@@ -99,7 +329,7 @@ public class RecursiveFileSearch
                     catch { }
                 }
 
-                
+
                 foreach (XmlNode node in nodeRelacionados)
                 {
                     try
@@ -107,7 +337,7 @@ public class RecursiveFileSearch
                         TipoRelacion = node.Attributes["TipoRelacion"].Value;
                     }
                     catch { }
-                    }
+                }
                 foreach (XmlNode node in nodeRelacionado)
                 {
                     try
@@ -266,141 +496,6 @@ public class RecursiveFileSearch
         }
     }
 
-    static void CreateCommand(string queryString)
-    {
-        //SQL Connection
-        string connectionString = @"Server=tcp:apre-digital.database.windows.net,1433;Initial Catalog=APRE_DB;Persist Security Info=False;User ID=apre_admin;Password=RG6wt9ea;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=100;";
-        //string connectionString = @"Server=.;Database=TestAPRE;Trusted_Connection=True;";
-
-        using (SqlConnection connection = new SqlConnection(connectionString))
-        {
-            SqlCommand command = new SqlCommand(queryString, connection);
-            //Open connection
-            command.Connection.Open();
-            //Execute query
-            command.ExecuteNonQuery();
-            //Close connection
-            command.Connection.Close();
-        }
-    }
-
-    static void ReadBSIK()
-    {
-        string queryString;
-        string[] lines = System.IO.File.ReadAllLines(@"C:\\Users\\he678hu\\OneDrive - EY\\PiSA\\BSIK\\BSIK_FEB_2022.txt");
-        System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-        stopwatch.Start();
-        // Display the file contents by using a foreach loop.
-
-        foreach (string line in lines)
-        {
-            if (!line.Contains("MANDT") && !line.Contains("Tabla:") && !line.Contains("Campos visualiz.:") && !line.Contains("----------------------------"))
-            {
-                queryString = "insert into BSIK(MANDT,BUKRS,LIFNR,UMSKS,UMSKZ,AUGDT,AUGBL,ZUONR,GJAHR,BELNR,BUZEI," +
-                    "BUDAT,BLDAT,CPUDT,WAERS,XBLNR,BLART,MONAT,BSCHL,ZUMSK,SHKZG,GSBER,MWSKZ,DMBTR,WRBTR,MWSTS,WMWST,BDIFF,BDIF2," +
-                    "SGTXT,PROJN,AUFNR,ANLN1,ANLN2,EBELN,EBELP,SAKNR,HKONT,FKONT,FILKD,ZFBDT,ZTERM,ZBD1T,ZBD2T,ZBD3T,ZBD1P,ZBD2P," +
-                    "SKFBT,SKNTO,WSKTO,ZLSCH,ZLSPR,ZBFIX,HBKID,BVTYP,REBZG,REBZJ,REBZZ,SAMNR,ZOLLT,ZOLLD,LZBKZ,LANDL,DIEKZ,MANSP," +
-                    "MSCHL,MADAT,MANST,MABER,XNETB,XANET,XCPDD,XESRD,XZAHL,MWSK1,DMBT1,WRBT1,MWSK2,DMBT2,WRBT2,MWSK3,DMBT3,WRBT3," +
-                    "QSSKZ,QSSHB,QBSHB,BSTAT,ANFBN,ANFBJ,ANFBU,VBUND,REBZT,STCEG,EGBLD,EGLLD,QSZNR,QSFBT) " + "values ('" + line.Remove(line.Length - 1).Replace("| |", "").Replace("|", "','") + "')";
-
-                CreateCommand(queryString);
-
-            }
-        }
-        stopwatch.Stop();
-        Console.WriteLine("*** Time elapsed: {0}", stopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.fff"));
-    }
-
-    static void ReadBSAK(System.IO.DirectoryInfo root)
-    {
-        string queryString;
-        int[] caracters = { };
-        System.IO.FileInfo[] files = null;
-        System.IO.DirectoryInfo[] subDirs = null;
-        using StreamWriter file = new("C:\\Users\\he678hu\\OneDrive - EY\\PiSA\\Log.txt", append: true);
-
-        // First, process all the files directly under this folder
-        try
-        {
-            files = root.GetFiles("*.*");
-        }
-        // This is thrown if even one of the files requires permissions greater
-        // than the application provides.
-        catch (UnauthorizedAccessException e)
-        {
-            // This code just writes out the message and continues to recurse.
-            // You may decide to do something different here. For example, you
-            // can try to elevate your privileges and access the file again.
-            log.Add(e.Message);
-        }
-
-        catch (System.IO.DirectoryNotFoundException e)
-        {
-            Console.WriteLine(e.Message);
-        }
-
-        if (files != null)
-        {
-            foreach (System.IO.FileInfo fi in files)
-            {
-                Console.WriteLine(fi.FullName);
-                int cnt = 0;
-                string[] lines = System.IO.File.ReadAllLines(fi.FullName, System.Text.Encoding.ASCII);
-
-                System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-                stopwatch.Start();
-                // Display the file contents by using a foreach loop.
-
-                foreach (string line in lines)
-                {
-                    string Cleanline = "";
-                    if (!line.Contains("MANDT") && !line.Contains("Tabla:") && !line.Contains("Campos visualiz.:") && !line.Contains("----------------------------"))
-                    {
-                        Cleanline = line.Remove(0, 3).Remove(line.Length - 4);
-
-                        if (caracters.Length > 0)
-                        {
-                            Cleanline = CleanLine(caracters, line.Remove(0, 3).Remove(line.Length - 4));
-                        }
-
-                        queryString = "insert into BSAK(MANDT,BUKRS,LIFNR,UMSKS,UMSKZ,AUGDT,AUGBL,ZUONR,GJAHR,BELNR,BUZEI,BUDAT,BLDAT,CPUDT," +
-                            "WAERS,XBLNR,BLART,MONAT,BSCHL,ZUMSK,SHKZG,MWSKZ,DMBTR,WRBTR,MWSTS,WMWST,BDIFF,SGTXT,SAKNR,ZFBDT,ZTERM,ZBD1T," +
-                            "ZBD2T,ZBD3T,ZBD1P,ZBD2P,SKFBT,SKNTO,WSKTO,ZLSCH,ZLSPR,ZBFIX,REBZG,REBZJ) " + "values ('" + Cleanline.Replace(",", "").Replace("'", "").Replace("|", "','") + "')";
-
-                        //try
-                        //{
-                        CreateCommand(queryString);
-                        //}
-                        //catch(Exception ex)
-                        /*{
-                            file.WriteLine(Cleanline.Replace("'", "").Replace("'", ""));
-                            cnt = cnt + 1;
-                        }*/
-
-                    }
-                    else
-                    {
-                        if (line.Contains("MANDT"))
-                        {
-                            caracters = CountCaracters(line.Remove(line.Length - 1).Replace("| |", ""));
-                        }
-                    }
-                }
-                stopwatch.Stop();
-                Console.WriteLine(cnt);
-                Console.WriteLine("*** Time elapsed: {0}", stopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.fff"));
-            }
-            // Now find all the subdirectories under this directory.
-            subDirs = root.GetDirectories();
-
-            foreach (System.IO.DirectoryInfo dirInfo in subDirs)
-            {
-                // Resursive call for each subdirectory.
-                ReadBSAK(dirInfo);
-            }
-        }
-    }
-
     static int[] CountCaracters(string line)
     {
         int[] caracters = { };
@@ -430,98 +525,23 @@ public class RecursiveFileSearch
         }
         return cleanLine.Remove(0, 1);
     }
-
-    static void Vendormaster()
+    
+    static void CreateCommand(string queryString)
     {
-        string queryString;
-        using StreamWriter file = new("C:\\Users\\he678hu\\OneDrive - EY\\PiSA\\Log.txt", append: true);
-        string[] lines = System.IO.File.ReadAllLines(@"C:\\Users\\he678hu\\OneDrive - EY\\PiSA\\LFA1_PiSA.txt", System.Text.Encoding.ASCII);
-        System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-        stopwatch.Start();
-        // Display the file contents by using a foreach loop.
+        //SQL Connection
+        string connectionString = @"Server=tcp:apre-digital.database.windows.net,1433;Initial Catalog=APRE_DB;Persist Security Info=False;User ID=apre_admin;Password=RG6wt9ea;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=100;";
+        //string connectionString = @"Server=.;Database=TestAPRE;Trusted_Connection=True;";
 
-        foreach (string line in lines)
+        using (SqlConnection connection = new SqlConnection(connectionString))
         {
-            if (!line.Contains("MANDT"))
-            {
-                queryString = "insert into VENDOR_MASTER(Id,MANDT,LIFNR,LAND1,NAME1,NAME2,NAME3,NAME4,ORT01,ORT02,PFACH," +
-                    "PSTLZ,REGIO,STRAS,ADRNR,ANRED,BEGRU,BRSCH,ERDAT,ERNAM,LOEVM,SPERR,SPERM,STCD1,TELF1,TELF2," +
-                    "VBUND,STCEG,SPERZ) " + "values ('" + line.Replace("'", "").Replace("|", "','") + "')";
-
-                try
-                {
-                    CreateCommand(queryString);
-                }
-                catch (Exception ex)
-                {
-                    file.WriteLine(line);
-                }
-
-            }
-        }
-        stopwatch.Stop();
-        Console.WriteLine("*** Time elapsed: {0}", stopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.fff"));
-    }
-
-    static string GetBlob(string containerName, string fileName)
-    {
-        string connectionString = $"DefaultEndpointsProtocol=https;AccountName=apredigital;" +
-            $"AccountKey=UamjIsnTRuZ2B5xmoPSPFTqzIQsIicHLBTaSAY2ol58mtNvisGewGcYBArPkjy0BfN79C0SX6X5g+AStuMXbHw==;" +
-            $"EndpointSuffix=core.windows.net";
-
-        // Setup the connection to the storage account
-        CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
-        Console.WriteLine("Connect to the blob storage");
-        // Connect to the blob storage
-        CloudBlobClient serviceClient = storageAccount.CreateCloudBlobClient();
-        // Connect to the blob container
-        Console.WriteLine("Connect to the blob container");
-        CloudBlobContainer container = serviceClient.GetContainerReference($"{containerName}");
-        // Connect to the blob file
-        CloudBlockBlob blob = container.GetBlockBlobReference($"{fileName}");
-        // Get the blob file as text
-        Console.WriteLine("Get the blob file as text");
-        string contents = blob.DownloadTextAsync().Result;
-        Console.WriteLine("Return text");
-        return contents;
-    }
-
-    public static void CallToChildThread()
-    {
-        //Vendormaster();
-        //ReadBSIK();
-
-
-        System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-
-
-        // Start with drives if you have to search the entire computer.
-        string[] drives = { "C:\\Users\\he678hu\\OneDrive - EY\\PiSA\\Cab Logistic\\ARCHIVOS XML\\RECIBIDOS\\2018" };
-        //string[] drives = {"C:\\Users\\he678hu\\OneDrive - EY\\PiSA\\BSAK"};
-
-        foreach (string dr in drives)
-        {
-            System.IO.DriveInfo di = new System.IO.DriveInfo(dr);
-            stopwatch.Start();
-            // Here we skip the drive if it is not ready to be read. This
-            // is not necessarily the appropriate action in all scenarios.
-            if (!di.IsReady)
-            {
-                Console.WriteLine("*** The drive {0} could not be read", di.Name);
-                continue;
-            }
-            System.IO.DirectoryInfo rootDir = new DirectoryInfo(dr);
-            WalkDirectoryTree(rootDir);
-            //ReadBSAK(rootDir);
-            stopwatch.Stop();
-            Console.WriteLine("### Time elapsed: {0}", stopwatch.Elapsed.ToString("hh\\:mm\\:ss\\.fff"));
-        }
-
-        // Write out all the files that could not be processed.
-        Console.WriteLine("Files with restricted access:");
-        foreach (string s in log)
-        {
-            Console.WriteLine(s);
+            SqlCommand command = new SqlCommand(queryString, connection);
+            //Open connection
+            command.Connection.Open();
+            //Execute query
+            command.ExecuteNonQuery();
+            //Close connection
+            command.Connection.Close();
         }
     }
+
 }
